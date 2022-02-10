@@ -1,0 +1,56 @@
+#!/bin/bash
+# bin/compile BUILD_DIR CACHE_DIR ENV_DIR
+
+# Should always return exit code
+set -eo pipefail
+
+# Heroku best practices
+indent() {
+  sed -u 's/^/       /'
+}
+
+arrow() {
+  sed -u 's/^/-----> /'
+}
+
+
+# Variables for later use
+BUILD_DIR=$1
+CACHE_DIR=$2
+ENV_DIR=$3
+
+# Where nim should lie? Vendor
+NIM_DIR="$BUILD_DIR/vendor/nim"
+NIM_BIN="$NIM_DIR/bin" # todo: be version specific
+
+# Start Compiling
+echo "Compiling Nim" | arrow
+
+mkdir -p "$NIM_BIN"
+
+cd $NIM_DIR
+
+NIM_ARCHIVE="nim.tar.xz"
+
+echo "Getting the Archive" | indent
+curl -L --silent --fail --retry 5 --retry-max-time 15 -o ./$NIM_ARCHIVE http://nim-lang.org/download/nim-1.6.4-linux_x64.tar.xz
+
+
+# Unpack tar
+echo "Unpacking the Archive" | indent
+
+tar xJf "./$NIM_ARCHIVE" --strip-components=1
+
+if [ "$?" != "0" ]; then
+  echo "Failed to Unpack" | indent && exit 1
+fi
+
+rm $NIM_ARCHIVE
+
+
+# Profile defaults to be executed before files
+PROFILE_PATH="$BUILD_DIR/.profile.d/nim-defaults.sh"
+mkdir -p $(dirname $PROFILE_PATH)
+echo 'export PATH="$PATH:${HOME}/vendor/nim/bin"' >> $PROFILE_PATH
+
+echo "Nim Installation Complete" | indent

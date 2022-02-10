@@ -1,0 +1,9 @@
+#!/bin/bash
+# bin/release BUILD_DIR
+
+cat << EOF
+---
+addons:
+default_process_types:
+ worker: nim c -r --verbosity:0 "main.nim"
+EOF

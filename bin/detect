@@ -1,0 +1,6 @@
+#!/bin/bash
+# bin/detect BUILD_DIR
+
+# Always install Nim as it's always valid
+echo Nim
+exit 0
